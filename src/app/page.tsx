@@ -44,7 +44,6 @@ export default function HomePage() {
     setHasMore(true);
   };
 
-  // Fetch data on page/category change
   useEffect(() => {
     const loadCats = async () => {
       setLoading(true);

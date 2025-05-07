@@ -39,5 +39,3 @@ export default function Header() {
     </header>
   );
 }
-
-// bg-gradient-to-r from-foreground to-70% to-background rounded-b-lg p-6 border border-t-0`}
