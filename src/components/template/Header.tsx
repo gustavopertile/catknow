@@ -1,10 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Header() {
-  const router = useRouter();
   const [visible, setVisible] = useState(true);
   const [lastScroll, setLastScroll] = useState(0);
 
@@ -32,11 +31,11 @@ export default function Header() {
       } flex justify-center 
        rounded-b-lg p-8 md:p-10 shadow bg-background`}
     >
-      <div onClick={() => router.push("/")}>
+      <Link href="/">
         <h1 className="text-4xl md:text-6xl font-bold cursor-pointer">
           🐈 CATKNOW
         </h1>
-      </div>
+      </Link>
     </header>
   );
 }

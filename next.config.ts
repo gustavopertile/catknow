@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
 
       {
         protocol: "https",
+        hostname: "cdn1.thecatapi.com",
+      },
+
+      {
+        protocol: "https",
         hostname: "**.media.tumblr.com",
       },
     ],

@@ -1,4 +1,5 @@
 import { Breed } from "@/types/breed";
+import Link from "next/link";
 
 type Props = {
   breed: Breed;
@@ -23,14 +24,14 @@ export default function BreedDescription({ breed }: Props) {
       {breed?.wikipedia_url && (
         <p>
           <span className="font-semibold">More Info:</span>{" "}
-          <a
+          <Link
             href={breed.wikipedia_url}
             target="_blank"
             rel="noopener noreferrer"
             className="underline text-primary"
           >
             Wikipedia
-          </a>
+          </Link>
         </p>
       )}
     </>

@@ -4,15 +4,36 @@ import BreedAttributes from "@/components/info/BreedAttributes";
 import BreedDescription from "@/components/info/BreedDescription";
 import CatDetailSkeleton from "@/components/skeleton/CatDetailSkeleton";
 import Header from "@/components/template/Header";
-import { useGetCatById } from "@/hooks/useGetCatById";
+import { fetchCatById } from "@/services/catService";
+import { Cat } from "@/types/cat";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function CatDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { data: cat, isLoading, error } = useGetCatById(id);
+  const [cat, setCat] = useState<Cat | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!id) return;
+
+    const loadCat = async () => {
+      try {
+        const catData = await fetchCatById(id);
+        setCat(catData);
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCat();
+  }, [id]);
+
+  if (loading) {
     return (
       <main className="p-4 pt-0 max-w-6xl mx-auto gap-4 flex flex-col">
         <Header />
@@ -21,10 +42,9 @@ export default function CatDetailPage() {
     );
   }
 
-  if (error || !cat)
-    return <p className="p-4">Ops, ocorreu um erro ao carregar gato.</p>;
+  if (error || !cat) return notFound();
 
-  const breed = cat?.breeds?.[0];
+  const breed = cat.breeds?.[0];
 
   return (
     <main className="p-4 pt-0 max-w-6xl mx-auto gap-4 flex flex-col">

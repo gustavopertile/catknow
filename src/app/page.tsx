@@ -5,28 +5,66 @@ import CategoryChip from "@/components/chip/CategoryChip";
 import CatCardSkeleton from "@/components/skeleton/CatCardSkeleton";
 import Header from "@/components/template/Header";
 import { CATEGORIES } from "@/constants/categories";
-import { useGetCats } from "@/hooks/useGetCats";
-import { CatCategory } from "@/types/cat";
-import { useState } from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
+import { fetchCats } from "@/services/catService";
+import { Cat, CatCategory } from "@/types/cat";
+import { useEffect, useRef, useState } from "react";
 
 export default function HomePage() {
+  const [cats, setCats] = useState<Cat[]>([]);
+  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<CatCategory | null>(
     null
   );
 
-  const { data, fetchNextPage, hasNextPage, isLoading, error } = useGetCats(
-    selectedCategory?.id
-  );
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  const cats = data?.pages?.flat() ?? [];
-
-  if (error)
-    return (
-      <p className="p-4">
-        Desculpe, algum erro inesperado aconteceu. Tente novamente mais tarde.
-      </p>
+  // Observe when the "load more" element is visible and trigger pagination
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !loading && hasMore) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.75, rootMargin: "200px" }
     );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [loading, hasMore]);
+
+  const clearData = () => {
+    setCats([]);
+    setPage(0);
+    setHasMore(true);
+  };
+
+  // Fetch data on page/category change
+  useEffect(() => {
+    const loadCats = async () => {
+      setLoading(true);
+      try {
+        const newCats = await fetchCats(page, selectedCategory?.id);
+        setCats((prev) => [...prev, ...newCats]);
+
+        if (newCats.length === 0) {
+          setHasMore(false);
+        }
+      } catch (err) {
+        console.error("Failed to fetch cats:", err);
+        setHasMore(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCats();
+  }, [page, selectedCategory]);
 
   return (
     <main className="p-4 pt-0 max-w-6xl mx-auto gap-4 flex flex-col">
@@ -39,6 +77,7 @@ export default function HomePage() {
             label={category.name}
             selected={selectedCategory?.id === category.id}
             onClick={() => {
+              clearData();
               setSelectedCategory(
                 selectedCategory?.id === category.id ? null : category
               );
@@ -47,32 +86,21 @@ export default function HomePage() {
         ))}
       </div>
 
-      {isLoading && (
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {cats.map((cat, index) => (
+          <CatCard key={index} cat={cat} />
+        ))}
+      </div>
+
+      {loading && (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mt-4">
-          {Array.from({ length: 12 }).map((_, index) => (
+          {Array.from({ length: 4 }).map((_, index) => (
             <CatCardSkeleton key={index} />
           ))}
         </div>
       )}
 
-      <InfiniteScroll
-        dataLength={cats.length}
-        next={fetchNextPage}
-        hasMore={!!hasNextPage}
-        loader={
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mt-4 mb-2">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <CatCardSkeleton key={index} />
-            ))}
-          </div>
-        }
-      >
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          {cats.map((cat, index) => (
-            <CatCard key={index} cat={cat} />
-          ))}
-        </div>
-      </InfiniteScroll>
+      <div ref={loadMoreRef} className="h-40" />
     </main>
   );
 }
