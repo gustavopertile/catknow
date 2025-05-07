@@ -1,19 +1,14 @@
 import { Cat } from "@/types/cat";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type CatCardProps = {
   cat: Cat;
 };
 
 export default function CatCard({ cat }: CatCardProps) {
-  const router = useRouter();
-
   return (
-    <div
-      className="rounded-xl overflow-hidden border cursor-pointer"
-      onClick={() => router.push(`/cat/${cat.id}`)}
-    >
+    <Link className="rounded-xl overflow-hidden border" href={`/cat/${cat.id}`}>
       <Image
         src={cat?.url}
         alt={"A cool cat"}
@@ -26,6 +21,6 @@ export default function CatCard({ cat }: CatCardProps) {
           ? "Just a very cool cat"
           : `Beautiful ${cat.breeds[0]?.name}`}
       </p>
-    </div>
+    </Link>
   );
 }
