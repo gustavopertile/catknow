@@ -17,18 +17,18 @@ export default function HomePage() {
   );
 
   useEffect(() => {
-    if (cats.length > 0 || page > 0) {
-      setCats([]);
-      setPage(0);
-    }
     loadCats();
-  }, [selectedCategory]);
+  }, [page, selectedCategory?.id]);
+
+  const clearData = () => {
+    setCats([]);
+    setPage(0);
+  };
 
   const loadCats = async () => {
     try {
       const newCats = await fetchCats(page, selectedCategory?.id ?? undefined);
       setCats((prev) => [...prev, ...newCats]);
-      setPage((prev) => prev + 1);
 
       console.log(newCats);
     } catch (error) {
@@ -46,24 +46,25 @@ export default function HomePage() {
             key={category.id}
             label={category.name}
             selected={selectedCategory?.id === category.id}
-            onClick={() =>
+            onClick={() => {
+              clearData();
               setSelectedCategory(
                 selectedCategory?.id === category.id ? null : category
-              )
-            }
+              );
+            }}
           />
         ))}
       </div>
 
       <InfiniteScroll
         dataLength={cats.length}
-        next={loadCats}
+        next={() => setPage((prev) => prev + 1)}
         hasMore={true}
         loader={<p>Carregando mais gatos...</p>}
       >
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {cats.map((cat) => (
-            <CatCard key={Math.random() + cat.id} cat={cat} />
+            <CatCard key={cat.id} cat={cat} />
           ))}
         </div>
       </InfiniteScroll>
