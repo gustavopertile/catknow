@@ -8,7 +8,7 @@ export async function fetchCats(
   categoryId?: number
 ): Promise<Cat[]> {
   const params = new URLSearchParams({
-    limit: "16",
+    limit: "12",
     page: page.toString(),
     ...(categoryId && { category_ids: categoryId.toString() }),
   });

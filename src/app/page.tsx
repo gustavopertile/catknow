@@ -2,6 +2,7 @@
 
 import CatCard from "@/components/card/CatCard";
 import CategoryChip from "@/components/chip/CategoryChip";
+import CatCardSkeleton from "@/components/skeleton/CatCardSkeleton";
 import Header from "@/components/template/Header";
 import { CATEGORIES } from "@/constants/categories";
 import { fetchCats } from "@/services/catService";
@@ -60,7 +61,13 @@ export default function HomePage() {
         dataLength={cats.length}
         next={() => setPage((prev) => prev + 1)}
         hasMore={true}
-        loader={<p>Carregando mais gatos...</p>}
+        loader={
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mt-4 mb-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <CatCardSkeleton key={i} />
+            ))}
+          </div>
+        }
       >
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {cats.map((cat) => (
