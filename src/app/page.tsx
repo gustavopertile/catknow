@@ -5,50 +5,40 @@ import CategoryChip from "@/components/chip/CategoryChip";
 import CatCardSkeleton from "@/components/skeleton/CatCardSkeleton";
 import Header from "@/components/template/Header";
 import { CATEGORIES } from "@/constants/categories";
-import { fetchCats } from "@/services/catService";
-import { Cat, CatCategory } from "@/types/cat";
-import { useEffect, useState } from "react";
+import { useGetCats } from "@/hooks/useGetCats";
+import { CatCategory } from "@/types/cat";
+import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 export default function HomePage() {
-  const [cats, setCats] = useState<Cat[]>([]);
-  const [page, setPage] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<CatCategory | null>(
     null
   );
 
-  useEffect(() => {
-    loadCats();
-  }, [page, selectedCategory?.id]);
+  const { data, fetchNextPage, hasNextPage, isLoading, error } = useGetCats(
+    selectedCategory?.id
+  );
 
-  const clearData = () => {
-    setCats([]);
-    setPage(0);
-  };
+  const cats = data?.pages?.flat() ?? [];
 
-  const loadCats = async () => {
-    try {
-      const newCats = await fetchCats(page, selectedCategory?.id ?? undefined);
-      setCats((prev) => [...prev, ...newCats]);
-
-      console.log(newCats);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  if (error)
+    return (
+      <p className="p-4">
+        Desculpe, algum erro inesperado aconteceu. Tente novamente mais tarde.
+      </p>
+    );
 
   return (
-    <main className="p-4 max-w-6xl mx-auto">
+    <main className="p-4 pt-0 max-w-6xl mx-auto gap-4 flex flex-col">
       <Header />
 
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 ">
         {CATEGORIES.map((category) => (
           <CategoryChip
             key={category.id}
             label={category.name}
             selected={selectedCategory?.id === category.id}
             onClick={() => {
-              clearData();
               setSelectedCategory(
                 selectedCategory?.id === category.id ? null : category
               );
@@ -57,21 +47,29 @@ export default function HomePage() {
         ))}
       </div>
 
+      {isLoading && (
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mt-4">
+          {Array.from({ length: 12 }).map((_, index) => (
+            <CatCardSkeleton key={index} />
+          ))}
+        </div>
+      )}
+
       <InfiniteScroll
         dataLength={cats.length}
-        next={() => setPage((prev) => prev + 1)}
-        hasMore={true}
+        next={fetchNextPage}
+        hasMore={!!hasNextPage}
         loader={
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mt-4 mb-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <CatCardSkeleton key={i} />
+            {Array.from({ length: 4 }).map((_, index) => (
+              <CatCardSkeleton key={index} />
             ))}
           </div>
         }
       >
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          {cats.map((cat) => (
-            <CatCard key={cat.id} cat={cat} />
+          {cats.map((cat, index) => (
+            <CatCard key={index} cat={cat} />
           ))}
         </div>
       </InfiniteScroll>
