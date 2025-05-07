@@ -26,8 +26,8 @@ export default function BreedAttributes({ breed }: Props) {
           </div>
           <div className="w-full bg-foreground/10 h-2 rounded">
             <div
-              className={`h-full bg-foreground rounded
-                  ${value === 0 ? "w-0" : `w-${value}/5`}`}
+              className="h-full bg-foreground rounded"
+              style={{ width: `${(value / 5) * 100}%` }}
             />
           </div>
         </div>
