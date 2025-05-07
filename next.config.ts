@@ -3,8 +3,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      new URL("https://cdn2.thecatapi.com/**"),
-      new URL("https://media.tumblr.com/**"),
+      {
+        protocol: "https",
+        hostname: "cdn2.thecatapi.com",
+      },
+
+      {
+        protocol: "https",
+        hostname: "**.media.tumblr.com",
+      },
     ],
   },
 };
