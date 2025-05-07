@@ -1,32 +1,31 @@
 import { Cat } from "@/types/cat";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 type CatCardProps = {
   cat: Cat;
 };
 
 export default function CatCard({ cat }: CatCardProps) {
+  const router = useRouter();
+
   return (
-    <div className="rounded-lg overflow-hidden shadow hover:shadow-md dark:shadow-customBlack transition cursor-pointer bg-white dark:bg-customBlack">
+    <div
+      className="rounded-xl overflow-hidden border cursor-pointer"
+      onClick={() => router.push(`/cat/${cat.id}`)}
+    >
       <Image
         src={cat?.url}
         alt={"A cool cat"}
-        className="w-full h-64 object-cover"
+        className={`w-full h-64 object-cover`}
         width={cat.width}
         height={cat.height}
-        unoptimized={cat.url.endsWith(".gif")}
       />
-      <div className="text-center p-3 text-foreground">
-        {cat.breeds.length === 0 ? (
-          <p className="text-sm">Just a very cool cat</p>
-        ) : (
-          cat.breeds.map((breed) => (
-            <div key={breed.id}>
-              <p className="text-sm">{breed.temperament}</p>
-            </div>
-          ))
-        )}
-      </div>
+      <p className="text-center text-sm p-2 border-t">
+        {cat.breeds.length === 0
+          ? "Just a very cool cat"
+          : `Beautiful ${cat.breeds[0]?.name}`}
+      </p>
     </div>
   );
 }
