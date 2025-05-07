@@ -20,7 +20,6 @@ export default function HomePage() {
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  // Observe when the "load more" element is visible and trigger pagination
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
